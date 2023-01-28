@@ -127,4 +127,88 @@ describe("Gitsec unit tests", function () {
         });
     });
 
+    describe("Update IPFS", function () {
+        it("Should add IPFS", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const IPFS = "hash";
+
+            await gitsec.connect(address1).createRepository(repoName);
+            await gitsec.connect(address1).updateIPFS(0, IPFS);
+
+            const repo = await gitsec.getRepository(0);
+
+            expect(repo.IPFS).to.equal(IPFS);
+        });
+
+        it("Should update IPFS", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const IPFS = "hash";
+            const newIPFS = "newHash";
+
+            await gitsec.connect(address1).createRepository(repoName);
+            await gitsec.connect(address1).updateIPFS(0, IPFS);
+            await gitsec.connect(address1).updateIPFS(0, newIPFS);
+
+            const repo = await gitsec.getRepository(0);
+
+            expect(repo.IPFS).to.equal(newIPFS);
+        });
+
+        it("Should emit event", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const IPFS = "hash";
+
+            await gitsec.connect(address1).createRepository(repoName);
+            const tx = gitsec.connect(address1).updateIPFS(0, IPFS);
+
+            await expect(tx).to.emit(gitsec, "IPFSHashUpdated").withArgs(0, address1.address, IPFS);
+        });
+
+        it("Should revert if given repo ID is invalid", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const IPFS = "hash";
+
+            const tx = gitsec.connect(address1).updateIPFS(0, IPFS);
+
+            await expect(tx).to.be.revertedWith("Gitsec: no repository found by given ID")
+        });
+
+        it("Should revert if caller is not the repo owner", async function () {
+            const {gitsec, address1, address2} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const IPFS = "hash";
+
+            await gitsec.connect(address1).createRepository(repoName);
+            const tx = gitsec.connect(address2).updateIPFS(0, IPFS);
+
+            await expect(tx).to.be.revertedWith("Gitsec: caller is not the repository owner")
+        });
+
+        it.skip("Should revert if IPFS hash is null", async function () {
+            const {gitsec, address1, address2} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const IPFS = "";
+
+            await gitsec.connect(address1).createRepository(repoName);
+            const tx = gitsec.connect(address2).updateIPFS(0, IPFS);
+
+            await expect(tx).to.be.revertedWith("Gitsec: IPFS is null")
+        });
+
+        it.skip("Should revert if IPFS hash is spaces only", async function () {
+            const {gitsec, address1, address2} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const IPFS = "   ";
+
+            await gitsec.connect(address1).createRepository(repoName);
+            const tx = gitsec.connect(address2).updateIPFS(0, IPFS);
+
+            await expect(tx).to.be.revertedWith("Gitsec: IPFS is null")
+        });
+
+    });
+
 })
