@@ -1,0 +1,1 @@
+# Gitsec project contract
