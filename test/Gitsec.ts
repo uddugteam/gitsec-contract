@@ -211,4 +211,81 @@ describe("Gitsec unit tests", function () {
 
     });
 
+    describe("Delete repository", function () {
+        it("Should burn token", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+
+            await gitsec.connect(address1).createRepository(repoName);
+            await gitsec.connect(address1).deleteRepository(0);
+
+            const tx = gitsec.ownerOf(0);
+
+            await expect(tx).to.be.revertedWithCustomError(gitsec, "OwnerQueryForNonexistentToken");
+        });
+
+        it("Should delete repository data struct form repositories mapping", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+
+            await gitsec.connect(address1).createRepository(repoName);
+            await gitsec.connect(address1).deleteRepository(0);
+
+            const repo = await gitsec.getRepository(0);
+
+            expect(repo.id).to.equal(0);
+            expect(repo.name).to.equal("");
+            expect(repo.owner).to.equal(zeroAddress);
+            expect(repo.IPFS).to.equal("");
+        });
+
+        it("Should reduce caller balance", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+
+            await gitsec.connect(address1).createRepository(repoName);
+            await gitsec.connect(address1).deleteRepository(0);
+
+            expect(await gitsec.balanceOf(address1.address)).to.equal(0);
+        });
+
+        it("Should reduce total supply", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+
+            await gitsec.connect(address1).createRepository(repoName);
+            await gitsec.connect(address1).deleteRepository(0);
+
+            expect(await gitsec.totalSupply()).to.equal(0);
+        });
+
+        it("Should emit transfer event", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+
+            await gitsec.connect(address1).createRepository(repoName);
+            const tx = gitsec.connect(address1).deleteRepository(0);
+
+            await expect(tx).to.emit(gitsec, "Transfer").withArgs(address1.address, zeroAddress, 0);
+        });
+
+        it("Should revert if caller is not repo owner", async function () {
+            const {gitsec, address1, address2} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+
+            await gitsec.connect(address1).createRepository(repoName);
+            const tx = gitsec.connect(address2).deleteRepository(0);
+
+            await expect(tx).to.be.revertedWith("Gitsec: caller is not the repository owner");
+        });
+
+
+        it("Should revert if invalid repo id", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+
+            const tx = gitsec.connect(address1).deleteRepository(0);
+
+            await expect(tx).to.be.revertedWith("Gitsec: no repository found by given ID");
+        });
+    });
 })

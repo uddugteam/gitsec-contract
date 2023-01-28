@@ -74,4 +74,23 @@ contract Gitsec is ERC721A, Ownable {
         emit IPFSHashUpdated(id, msg.sender, newIPFS);
     }
 
+    /*
+     * Allows to delete repository. Deletes repository from `_repositories` mapping and burns NFT
+     *
+     * @param id - repository id
+     *
+     * Requirements:
+     * - repository should exist
+     * - caller should be repo owner
+     *
+     * emits `Transfer` event {See IERC721A}
+     */
+    function deleteRepository(uint256 id) external {
+        require(_exists(id), "Gitsec: no repository found by given ID");
+        require(ownerOf(id) == msg.sender, "Gitsec: caller is not the repository owner");
+
+        _burn(id);
+        delete _repositories[id];
+    }
+
 }
