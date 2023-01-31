@@ -6,11 +6,18 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Gitsec is ERC721A, Ownable {
 
-    // Repository data struct with repo ID (equal to token ID), repo name, repo owner (equal to token owner) and repo IPFS
-    // IPFS can be null
+    /*
+     * Repository data struct
+     * - `id`           repo and NFT ID
+     * - `name`         repo name
+     * - `description`  repo description, can be null
+     * - `owner`        repo and NFT owner
+     * - `IPFS`         repo IPFS hash
+     */
     struct Repository {
         uint256 id;
         string name;
+        string description;
         address owner;
         string IPFS;
     }
@@ -32,16 +39,17 @@ contract Gitsec is ERC721A, Ownable {
      * Allows to create repository. Mints NFT to caller and adds Repository data struct to `_repositories` mapping
      *
      * @param name - repository name
+     * @param description - repository description
      * @return repository ID
      *
      * emits `RepositoryCreated` event
      * emits `Transfer` event {See IERC721A}
      */
-    function createRepository(string memory name) external returns(uint256) {
+    function createRepository(string memory name, string memory description) external returns(uint256) {
         uint256 tokenId = _nextTokenId();
 
         _safeMint(msg.sender, 1);
-        _repositories[tokenId] = Repository(tokenId, name, msg.sender, "");
+        _repositories[tokenId] = Repository(tokenId, name, description, msg.sender, "");
 
         emit RepositoryCreated(tokenId, name, msg.sender);
 
@@ -72,6 +80,23 @@ contract Gitsec is ERC721A, Ownable {
         _repositories[id].IPFS = newIPFS;
 
         emit IPFSHashUpdated(id, msg.sender, newIPFS);
+    }
+
+    /*
+     * Allows to set or update description for given repo ID
+     *
+     * @param id - repository id
+     * @param newDescription - new repository description
+     *
+     * Requirements:
+     * - repository should exist
+     * - caller should be repo owner
+     */
+    function updateDescription(uint256 id, string memory newDescription) external {
+        require(_exists(id), "Gitsec: no repository found by given ID");
+        require(ownerOf(id) == msg.sender, "Gitsec: caller is not the repository owner");
+
+        _repositories[id].description = newDescription;
     }
 
     /*
