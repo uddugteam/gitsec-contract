@@ -25,6 +25,9 @@ contract Gitsec is ERC721A, Ownable {
     // Mapping token and repo ID to repository data struct
     mapping(uint256 => Repository) private _repositories;
 
+    // Mapping user address to repository ids
+    mapping(address => uint256[]) private _userRepositories;
+
     // Triggered when repository created
     event RepositoryCreated(uint256 repId, string repName, address owner);
 
@@ -50,6 +53,7 @@ contract Gitsec is ERC721A, Ownable {
 
         _safeMint(msg.sender, 1);
         _repositories[tokenId] = Repository(tokenId, name, description, msg.sender, "");
+        _userRepositories[msg.sender].push(tokenId);
 
         emit RepositoryCreated(tokenId, name, msg.sender);
 
@@ -59,6 +63,22 @@ contract Gitsec is ERC721A, Ownable {
     // Returns Repository data struct for given repo ID
     function getRepository(uint256 id) external view returns(Repository memory) {
         return _repositories[id];
+    }
+
+    // Returns user repository array
+    function getUserRepositories(address user) external view returns(Repository[] memory) {
+        Repository[] memory userRepositories = new Repository[](_userRepositories[user].length);
+
+        uint256 index = 0;
+
+        for(uint256 i = 0; i < _nextTokenId(); i++) {
+            if (_repositories[i].owner == user) {
+                userRepositories[index] = _repositories[i];
+                index++;
+            }
+        }
+
+        return userRepositories;
     }
 
     /*
@@ -116,6 +136,14 @@ contract Gitsec is ERC721A, Ownable {
 
         _burn(id);
         delete _repositories[id];
+
+        for (uint256 i = 0; i < _userRepositories[msg.sender].length; i++) {
+            if (_userRepositories[msg.sender][i] == id) {
+                _userRepositories[msg.sender][i] = _userRepositories[msg.sender][_userRepositories[msg.sender].length -1];
+                _userRepositories[msg.sender].pop();
+                break;
+            }
+        }
     }
 
 }

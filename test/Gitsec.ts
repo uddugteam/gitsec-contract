@@ -95,6 +95,29 @@ describe("Gitsec unit tests", function () {
             expect(repo.description).to.equal(repoDescription);
         });
 
+        it("Should add repository id to user repositories mapping", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description"
+
+            await gitsec.connect(address1).createRepository(repoName, repoDescription);
+
+            const repos = await gitsec.getUserRepositories(address1.address);
+
+            expect(repos[0].id).to.equal(0);
+            expect(repos[0].name).to.equal(repoName);
+            expect(repos[0].owner).to.equal(address1.address);
+            expect(repos[0].description).to.equal(repoDescription);
+        });
+
+        it("Get repositories should return zero length array if no user repositories", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+
+            const repos = await gitsec.getUserRepositories(address1.address);
+
+            expect(repos.length).to.equal(0);
+        });
+
         it("Should emit transfer event", async function () {
             const {gitsec, address1} = await loadFixture(deployGitsecFixture);
             const repoName = "Test repo";
@@ -315,6 +338,24 @@ describe("Gitsec unit tests", function () {
             expect(repo.name).to.equal("");
             expect(repo.owner).to.equal(zeroAddress);
             expect(repo.IPFS).to.equal("");
+        });
+
+        it("Should delete repository id form user repositories mapping", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description"
+
+            await gitsec.connect(address1).createRepository(repoName, repoDescription);
+            await gitsec.connect(address1).createRepository(repoName, repoDescription);
+            await gitsec.connect(address1).createRepository(repoName, repoDescription);
+
+            await gitsec.connect(address1).deleteRepository(1);
+
+            const repos = await gitsec.getUserRepositories(address1.address);
+
+            expect(repos.length).to.equal(2);
+            expect(repos[0].id).to.equal(0);
+            expect(repos[1].id).to.equal(2);
         });
 
         it("Should reduce caller balance", async function () {
