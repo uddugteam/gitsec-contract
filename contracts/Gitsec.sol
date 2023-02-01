@@ -65,7 +65,7 @@ contract Gitsec is ERC721A, Ownable {
         return _repositories[id];
     }
 
-    // Returns user repository array
+    // Returns user repositories array
     function getUserRepositories(address user) external view returns(Repository[] memory) {
         Repository[] memory userRepositories = new Repository[](_userRepositories[user].length);
 
@@ -73,6 +73,22 @@ contract Gitsec is ERC721A, Ownable {
 
         for(uint256 i = 0; i < _nextTokenId(); i++) {
             if (_repositories[i].owner == user) {
+                userRepositories[index] = _repositories[i];
+                index++;
+            }
+        }
+
+        return userRepositories;
+    }
+
+    // Returns all repositories array
+    function getAllRepositories() external view returns(Repository[] memory) {
+        Repository[] memory userRepositories = new Repository[](totalSupply());
+
+        uint256 index = 0;
+
+        for(uint256 i = 0; i < _nextTokenId(); i++) {
+            if (_repositories[i].owner != address(0)) {
                 userRepositories[index] = _repositories[i];
                 index++;
             }
