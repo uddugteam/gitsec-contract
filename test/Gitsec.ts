@@ -180,6 +180,72 @@ describe("Gitsec unit tests", function () {
         });
     });
 
+    describe("Set admin", function () {
+        it("Should set admin", async function () {
+            const {gitsec, address1, address2} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description"
+            let repository;
+
+            await gitsec.connect(address1).createRepository(repoName, repoDescription);
+
+            repository = await gitsec.getRepository(0);
+            expect(repository.admin).to.equal(zeroAddress);
+
+            await gitsec.connect(address1).setAdmin(0, address2.address);
+
+            repository = await gitsec.getRepository(0);
+            expect(repository.admin).to.equal(address2.address);
+        });
+
+        it("Should update admin", async function () {
+            const {gitsec, address1, address2, address3} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description"
+            let repository;
+
+            await gitsec.connect(address1).createRepository(repoName, repoDescription);
+            await gitsec.connect(address1).setAdmin(0, address2.address);
+            await gitsec.connect(address1).setAdmin(0, address3.address);
+
+
+            repository = await gitsec.getRepository(0);
+            expect(repository.admin).to.equal(address3.address);
+        });
+
+        it("Should revert if given repo ID is invalid", async function () {
+            const {gitsec, address1, address2} = await loadFixture(deployGitsecFixture);
+
+            const tx = gitsec.connect(address1).setAdmin(0, address2.address);
+
+            await expect(tx).to.be.revertedWith("Gitsec: no repository found by given ID")
+        });
+
+        it("Should revert if caller is not the repo owner", async function () {
+            const {gitsec, address1, address2} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description"
+
+            await gitsec.connect(address1).createRepository(repoName, repoDescription);
+            const tx = gitsec.connect(address2).setAdmin(0, address2.address);
+
+            await expect(tx).to.be.revertedWith("Gitsec: caller is not the repository owner")
+        });
+
+        it("Should revert if caller is admin", async function () {
+            const {gitsec, address1, address2, address3} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description"
+
+            await gitsec.connect(address1).createRepository(repoName, repoDescription);
+            await gitsec.connect(address1).setAdmin(0, address2.address);
+            const tx = gitsec.connect(address2).setAdmin(0, address3.address);
+
+            await expect(tx).to.be.revertedWith("Gitsec: caller is not the repository owner")
+        });
+
+    });
+
     describe("Update IPFS", function () {
         it("Should add IPFS", async function () {
             const {gitsec, address1} = await loadFixture(deployGitsecFixture);
@@ -189,6 +255,21 @@ describe("Gitsec unit tests", function () {
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
             await gitsec.connect(address1).updateIPFS(0, IPFS);
+
+            const repo = await gitsec.getRepository(0);
+
+            expect(repo.IPFS).to.equal(IPFS);
+        });
+
+        it("Should add IPFS if caller is admin", async function () {
+            const {gitsec, address1, address2} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description"
+            const IPFS = "hash";
+
+            await gitsec.connect(address1).createRepository(repoName, repoDescription);
+            await gitsec.connect(address1).setAdmin(0, address2.address);
+            await gitsec.connect(address2).updateIPFS(0, IPFS);
 
             const repo = await gitsec.getRepository(0);
 
@@ -232,7 +313,7 @@ describe("Gitsec unit tests", function () {
             await expect(tx).to.be.revertedWith("Gitsec: no repository found by given ID")
         });
 
-        it("Should revert if caller is not the repo owner", async function () {
+        it("Should revert if caller is not the repo owner or admin", async function () {
             const {gitsec, address1, address2} = await loadFixture(deployGitsecFixture);
             const repoName = "Test repo";
             const repoDescription = "Test repo description"
@@ -241,7 +322,7 @@ describe("Gitsec unit tests", function () {
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
             const tx = gitsec.connect(address2).updateIPFS(0, IPFS);
 
-            await expect(tx).to.be.revertedWith("Gitsec: caller is not the repository owner")
+            await expect(tx).to.be.revertedWith("Gitsec: caller is not the repository owner or admin")
         });
 
         it.skip("Should revert if IPFS hash is null", async function () {
