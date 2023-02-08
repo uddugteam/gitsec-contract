@@ -28,6 +28,9 @@ contract Gitsec is ERC721A, Ownable {
     // Mapping user address to repository ids
     mapping(address => uint256[]) private _userRepositories;
 
+    // Contract admin address
+    address private _admin;
+
     // Triggered when repository created
     event RepositoryCreated(uint256 repId, string repName, address owner);
 
@@ -98,6 +101,23 @@ contract Gitsec is ERC721A, Ownable {
     }
 
     /*
+     * Allows to set or update contract admin
+     *
+     * @param admin - admin address
+     *
+     * Requirements:
+     * - caller should be a contract owner
+     */
+    function setAdmin(address admin) external onlyOwner {
+        _admin = admin;
+    }
+
+    // Returns current contract admin address
+    function admin() external view returns(address) {
+        return _admin;
+    }
+
+    /*
      * Allows to set or update IPFS hash for given repo ID
      *
      * @param id - repository id
@@ -105,13 +125,13 @@ contract Gitsec is ERC721A, Ownable {
      *
      * Requirements:
      * - repository should exist
-     * - caller should be repo owner
+     * - caller should be repo owner or admin
      *
      * emits `IPFSHashUpdated` event
      */
     function updateIPFS(uint256 id, string memory newIPFS) external {
         require(_exists(id), "Gitsec: no repository found by given ID");
-        require(ownerOf(id) == msg.sender, "Gitsec: caller is not the repository owner");
+        require(_isOwnerOrAdmin(id, msg.sender), "Gitsec: caller is not the repository owner or admin");
 
         _repositories[id].IPFS = newIPFS;
 
@@ -160,6 +180,10 @@ contract Gitsec is ERC721A, Ownable {
                 break;
             }
         }
+    }
+
+    function _isOwnerOrAdmin(uint256 id, address user) internal view returns(bool) {
+        return _repositories[id].owner == user || _admin == user;
     }
 
 }
