@@ -103,13 +103,13 @@ contract Gitsec is ERC721A, Ownable {
     /*
      * Allows to set or update contract admin
      *
-     * @param admin - admin address
+     * @param newAdmin - admin address
      *
      * Requirements:
      * - caller should be a contract owner
      */
-    function setAdmin(address admin) external onlyOwner {
-        _admin = admin;
+    function setAdmin(address newAdmin) external onlyOwner {
+        _admin = newAdmin;
     }
 
     // Returns current contract admin address
