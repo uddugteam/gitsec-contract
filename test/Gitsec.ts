@@ -57,7 +57,7 @@ describe("Gitsec unit tests", function () {
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
 
-            expect(await gitsec.ownerOf(0)).to.equal(address1.address);
+            expect(await gitsec.ownerOf(1)).to.equal(address1.address);
         });
 
         it("Should change callers balance", async function () {
@@ -87,9 +87,9 @@ describe("Gitsec unit tests", function () {
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
 
-            const repo = await gitsec.getRepository(0);
+            const repo = await gitsec.getRepository(1);
 
-            expect(repo.id).to.equal(0);
+            expect(repo.id).to.equal(1);
             expect(repo.name).to.equal(repoName);
             expect(repo.owner).to.equal(address1.address);
             expect(repo.description).to.equal(repoDescription);
@@ -104,7 +104,7 @@ describe("Gitsec unit tests", function () {
 
             const repos = await gitsec.getUserRepositories(address1.address);
 
-            expect(repos[0].id).to.equal(0);
+            expect(repos[0].id).to.equal(1);
             expect(repos[0].name).to.equal(repoName);
             expect(repos[0].owner).to.equal(address1.address);
             expect(repos[0].description).to.equal(repoDescription);
@@ -120,12 +120,12 @@ describe("Gitsec unit tests", function () {
 
             const repos = await gitsec.getAllRepositories();
 
-            expect(repos[0].id).to.equal(0);
+            expect(repos[0].id).to.equal(1);
             expect(repos[0].name).to.equal(repoName);
             expect(repos[0].owner).to.equal(address1.address);
             expect(repos[0].description).to.equal(repoDescription);
 
-            expect(repos[1].id).to.equal(1);
+            expect(repos[1].id).to.equal(2);
             expect(repos[1].name).to.equal(repoName);
             expect(repos[1].owner).to.equal(address2.address);
             expect(repos[1].description).to.equal(repoDescription);
@@ -146,7 +146,7 @@ describe("Gitsec unit tests", function () {
 
             const tx = gitsec.connect(address1).createRepository(repoName, repoDescription);
 
-            await expect(tx).to.emit(gitsec, "Transfer").withArgs(zeroAddress, address1.address, 0);
+            await expect(tx).to.emit(gitsec, "Transfer").withArgs(zeroAddress, address1.address, 1);
         });
 
         it("Should emit repository created event", async function () {
@@ -156,7 +156,7 @@ describe("Gitsec unit tests", function () {
 
             const tx = gitsec.connect(address1).createRepository(repoName, repoDescription);
 
-            await expect(tx).to.emit(gitsec, "RepositoryCreated").withArgs(0, repoName, address1.address);
+            await expect(tx).to.emit(gitsec, "RepositoryCreated").withArgs(1, repoName, address1.address);
         });
 
         it.skip("Should not create repository if name is null", async function () {
@@ -218,9 +218,9 @@ describe("Gitsec unit tests", function () {
                         const IPFS = "hash";
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
-            await gitsec.connect(address1).updateIPFS(0, IPFS);
+            await gitsec.connect(address1).updateIPFS(1, IPFS);
 
-            const repo = await gitsec.getRepository(0);
+            const repo = await gitsec.getRepository(1);
 
             expect(repo.IPFS).to.equal(IPFS);
         });
@@ -233,9 +233,9 @@ describe("Gitsec unit tests", function () {
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
             await gitsec.setAdmin(address2.address);
-            await gitsec.connect(address2).updateIPFS(0, IPFS);
+            await gitsec.connect(address2).updateIPFS(1, IPFS);
 
-            const repo = await gitsec.getRepository(0);
+            const repo = await gitsec.getRepository(1);
 
             expect(repo.IPFS).to.equal(IPFS);
         });
@@ -248,10 +248,10 @@ describe("Gitsec unit tests", function () {
             const newIPFS = "newHash";
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
-            await gitsec.connect(address1).updateIPFS(0, IPFS);
-            await gitsec.connect(address1).updateIPFS(0, newIPFS);
+            await gitsec.connect(address1).updateIPFS(1, IPFS);
+            await gitsec.connect(address1).updateIPFS(1, newIPFS);
 
-            const repo = await gitsec.getRepository(0);
+            const repo = await gitsec.getRepository(1);
 
             expect(repo.IPFS).to.equal(newIPFS);
         });
@@ -263,16 +263,16 @@ describe("Gitsec unit tests", function () {
                         const IPFS = "hash";
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
-            const tx = gitsec.connect(address1).updateIPFS(0, IPFS);
+            const tx = gitsec.connect(address1).updateIPFS(1, IPFS);
 
-            await expect(tx).to.emit(gitsec, "IPFSHashUpdated").withArgs(0, address1.address, IPFS);
+            await expect(tx).to.emit(gitsec, "IPFSHashUpdated").withArgs(1, address1.address, IPFS);
         });
 
         it("Should revert if given repo ID is invalid", async function () {
             const {gitsec, address1} = await loadFixture(deployGitsecFixture);
             const IPFS = "hash";
 
-            const tx = gitsec.connect(address1).updateIPFS(0, IPFS);
+            const tx = gitsec.connect(address1).updateIPFS(1, IPFS);
 
             await expect(tx).to.be.revertedWith("Gitsec: no repository found by given ID")
         });
@@ -284,7 +284,7 @@ describe("Gitsec unit tests", function () {
                         const IPFS = "hash";
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
-            const tx = gitsec.connect(address2).updateIPFS(0, IPFS);
+            const tx = gitsec.connect(address2).updateIPFS(1, IPFS);
 
             await expect(tx).to.be.revertedWith("Gitsec: caller is not the repository owner or admin")
         });
@@ -296,7 +296,7 @@ describe("Gitsec unit tests", function () {
                         const IPFS = "";
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
-            const tx = gitsec.connect(address2).updateIPFS(0, IPFS);
+            const tx = gitsec.connect(address2).updateIPFS(1, IPFS);
 
             await expect(tx).to.be.revertedWith("Gitsec: IPFS is null")
         });
@@ -308,7 +308,7 @@ describe("Gitsec unit tests", function () {
                         const IPFS = "   ";
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
-            const tx = gitsec.connect(address2).updateIPFS(0, IPFS);
+            const tx = gitsec.connect(address2).updateIPFS(1, IPFS);
 
             await expect(tx).to.be.revertedWith("Gitsec: IPFS is null")
         });
@@ -323,11 +323,11 @@ describe("Gitsec unit tests", function () {
             const newDescription = "Test repo description"
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
-            await gitsec.connect(address1).updateDescription(0, newDescription);
+            await gitsec.connect(address1).updateDescription(1, newDescription);
 
-            const repo = await gitsec.getRepository(0);
+            const repo = await gitsec.getRepository(1);
 
-            expect(repo.id).to.equal(0);
+            expect(repo.id).to.equal(1);
             expect(repo.name).to.equal(repoName);
             expect(repo.owner).to.equal(address1.address);
             expect(repo.description).to.equal(newDescription);
@@ -340,11 +340,11 @@ describe("Gitsec unit tests", function () {
             const newDescription = "Test repo description updated"
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
-            await gitsec.connect(address1).updateDescription(0, newDescription);
+            await gitsec.connect(address1).updateDescription(1, newDescription);
 
-            const repo = await gitsec.getRepository(0);
+            const repo = await gitsec.getRepository(1);
 
-            expect(repo.id).to.equal(0);
+            expect(repo.id).to.equal(1);
             expect(repo.name).to.equal(repoName);
             expect(repo.owner).to.equal(address1.address);
             expect(repo.description).to.equal(newDescription);
@@ -357,7 +357,7 @@ describe("Gitsec unit tests", function () {
             const newDescription = "Test repo description updated"
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
-            const tx = gitsec.connect(address1).updateDescription(1, newDescription);
+            const tx = gitsec.connect(address1).updateDescription(2, newDescription);
 
             await expect(tx).to.be.revertedWith("Gitsec: no repository found by given ID");
         });
@@ -369,7 +369,7 @@ describe("Gitsec unit tests", function () {
             const newDescription = "Test repo description updated"
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
-            const tx = gitsec.connect(address2).updateDescription(0, newDescription);
+            const tx = gitsec.connect(address2).updateDescription(1, newDescription);
 
             await expect(tx).to.be.revertedWith("Gitsec: caller is not the repository owner");
         });
@@ -383,9 +383,9 @@ describe("Gitsec unit tests", function () {
             const repoDescription = "Test repo description"
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
-            await gitsec.connect(address1).deleteRepository(0);
+            await gitsec.connect(address1).deleteRepository(1);
 
-            const tx = gitsec.ownerOf(0);
+            const tx = gitsec.ownerOf(1);
 
             await expect(tx).to.be.revertedWithCustomError(gitsec, "OwnerQueryForNonexistentToken");
         });
@@ -396,9 +396,9 @@ describe("Gitsec unit tests", function () {
             const repoDescription = "Test repo description"
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
-            await gitsec.connect(address1).deleteRepository(0);
+            await gitsec.connect(address1).deleteRepository(1);
 
-            const repo = await gitsec.getRepository(0);
+            const repo = await gitsec.getRepository(1);
 
             expect(repo.id).to.equal(0);
             expect(repo.name).to.equal("");
@@ -416,13 +416,13 @@ describe("Gitsec unit tests", function () {
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
             await gitsec.connect(address3).createRepository(repoName, repoDescription);
 
-            await gitsec.connect(address1).deleteRepository(1);
+            await gitsec.connect(address1).deleteRepository(2);
 
             const repos = await gitsec.getUserRepositories(address1.address);
 
             expect(repos.length).to.equal(2);
-            expect(repos[0].id).to.equal(0);
-            expect(repos[1].id).to.equal(2);
+            expect(repos[0].id).to.equal(1);
+            expect(repos[1].id).to.equal(3);
         });
 
         it("Should return all repositories except deleted", async function () {
@@ -435,14 +435,14 @@ describe("Gitsec unit tests", function () {
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
             await gitsec.connect(address3).createRepository(repoName, repoDescription);
 
-            await gitsec.connect(address1).deleteRepository(1);
+            await gitsec.connect(address1).deleteRepository(2);
 
             const allRepos = await gitsec.getAllRepositories();
 
             expect(allRepos.length).to.equal(3);
-            expect(allRepos[0].id).to.equal(0);
-            expect(allRepos[1].id).to.equal(2);
-            expect(allRepos[2].id).to.equal(3);
+            expect(allRepos[0].id).to.equal(1);
+            expect(allRepos[1].id).to.equal(3);
+            expect(allRepos[2].id).to.equal(4);
         });
 
         it("Should reduce caller balance", async function () {
@@ -451,7 +451,7 @@ describe("Gitsec unit tests", function () {
             const repoDescription = "Test repo description"
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
-            await gitsec.connect(address1).deleteRepository(0);
+            await gitsec.connect(address1).deleteRepository(1);
 
             expect(await gitsec.balanceOf(address1.address)).to.equal(0);
         });
@@ -462,7 +462,7 @@ describe("Gitsec unit tests", function () {
             const repoDescription = "Test repo description"
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
-            await gitsec.connect(address1).deleteRepository(0);
+            await gitsec.connect(address1).deleteRepository(1);
 
             expect(await gitsec.totalSupply()).to.equal(0);
         });
@@ -473,9 +473,9 @@ describe("Gitsec unit tests", function () {
             const repoDescription = "Test repo description"
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
-            const tx = gitsec.connect(address1).deleteRepository(0);
+            const tx = gitsec.connect(address1).deleteRepository(1);
 
-            await expect(tx).to.emit(gitsec, "Transfer").withArgs(address1.address, zeroAddress, 0);
+            await expect(tx).to.emit(gitsec, "Transfer").withArgs(address1.address, zeroAddress, 1);
         });
 
         it("Should revert if caller is not repo owner", async function () {
@@ -484,7 +484,7 @@ describe("Gitsec unit tests", function () {
             const repoDescription = "Test repo description"
 
             await gitsec.connect(address1).createRepository(repoName, repoDescription);
-            const tx = gitsec.connect(address2).deleteRepository(0);
+            const tx = gitsec.connect(address2).deleteRepository(1);
 
             await expect(tx).to.be.revertedWith("Gitsec: caller is not the repository owner");
         });
@@ -493,7 +493,7 @@ describe("Gitsec unit tests", function () {
         it("Should revert if invalid repo id", async function () {
             const {gitsec, address1} = await loadFixture(deployGitsecFixture);
 
-            const tx = gitsec.connect(address1).deleteRepository(0);
+            const tx = gitsec.connect(address1).deleteRepository(1);
 
             await expect(tx).to.be.revertedWith("Gitsec: no repository found by given ID");
         });

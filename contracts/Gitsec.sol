@@ -186,4 +186,11 @@ contract Gitsec is ERC721A, Ownable {
         return _repositories[id].owner == user || _admin == user;
     }
 
+    /**
+     * @dev Returns the starting token ID.
+     */
+    function _startTokenId() internal view override returns (uint256) {
+        return 1;
+    }
+
 }
