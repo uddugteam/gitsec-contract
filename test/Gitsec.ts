@@ -156,7 +156,7 @@ describe("Gitsec unit tests", function () {
 
             const tx = gitsec.connect(address1).createRepository(repoName, repoDescription);
 
-            await expect(tx).to.emit(gitsec, "RepositoryCreated").withArgs(1, repoName, address1.address);
+            await expect(tx).to.emit(gitsec, "RepositoryCreated").withArgs(1, repoName, address1.address, repoDescription);
         });
 
         it.skip("Should not create repository if name is null", async function () {
