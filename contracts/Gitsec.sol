@@ -13,6 +13,7 @@ contract Gitsec is ERC721A, Ownable {
      * - `description`  repo description, can be null
      * - `owner`        repo and NFT owner
      * - `IPFS`         repo IPFS hash
+     * - `lastUpdate`   repo last IPFS hash update
      */
     struct Repository {
         uint256 id;
@@ -20,6 +21,7 @@ contract Gitsec is ERC721A, Ownable {
         string description;
         address owner;
         string IPFS;
+        uint256 lastUpdate;
     }
 
     // Mapping token and repo ID to repository data struct
@@ -55,7 +57,7 @@ contract Gitsec is ERC721A, Ownable {
         uint256 tokenId = _nextTokenId();
 
         _safeMint(msg.sender, 1);
-        _repositories[tokenId] = Repository(tokenId, name, description, msg.sender, "");
+        _repositories[tokenId] = Repository(tokenId, name, description, msg.sender, "", 0);
         _userRepositories[msg.sender].push(tokenId);
 
         emit RepositoryCreated(tokenId, name, msg.sender, description);
@@ -118,7 +120,7 @@ contract Gitsec is ERC721A, Ownable {
     }
 
     /*
-     * Allows to set or update IPFS hash for given repo ID
+     * Allows to set or update IPFS hash for given repo ID. Updates `lastUpdate` field in repository struct
      *
      * @param id - repository id
      * @param newIPFS - IPFS hash
@@ -134,6 +136,7 @@ contract Gitsec is ERC721A, Ownable {
         require(_isOwnerOrAdmin(id, msg.sender), "Gitsec: caller is not the repository owner or admin");
 
         _repositories[id].IPFS = newIPFS;
+        _repositories[id].lastUpdate = block.timestamp;
 
         emit IPFSHashUpdated(id, msg.sender, newIPFS);
     }

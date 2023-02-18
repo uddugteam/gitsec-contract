@@ -1,5 +1,5 @@
 import {ethers} from "hardhat";
-import {loadFixture} from "@nomicfoundation/hardhat-network-helpers";
+import {loadFixture, time} from "@nomicfoundation/hardhat-network-helpers";
 import {expect} from "chai";
 
 describe("Gitsec unit tests", function () {
@@ -267,6 +267,21 @@ describe("Gitsec unit tests", function () {
 
             await expect(tx).to.emit(gitsec, "IPFSHashUpdated").withArgs(1, address1.address, IPFS);
         });
+
+        it("Should update last update field", async function() {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description"
+            const IPFS = "hash";
+
+            await gitsec.connect(address1).createRepository(repoName, repoDescription);
+            await gitsec.connect(address1).updateIPFS(1, IPFS);
+            const timestamp = await time.latest();
+
+            const repository = await gitsec.getRepository(1);
+
+            expect(repository.lastUpdate).to.equal(timestamp);
+        })
 
         it("Should revert if given repo ID is invalid", async function () {
             const {gitsec, address1} = await loadFixture(deployGitsecFixture);
