@@ -32,7 +32,7 @@ contract Gitsec is ERC721A, Ownable {
     address private _admin;
 
     // Triggered when repository created
-    event RepositoryCreated(uint256 repId, string repName, address owner);
+    event RepositoryCreated(uint256 repId, string repName, address owner, string description);
 
     // Triggered when IPFS hash is updated
     event IPFSHashUpdated(uint256 indexed repId, address indexed owner, string IPFS);
@@ -58,7 +58,7 @@ contract Gitsec is ERC721A, Ownable {
         _repositories[tokenId] = Repository(tokenId, name, description, msg.sender, "");
         _userRepositories[msg.sender].push(tokenId);
 
-        emit RepositoryCreated(tokenId, name, msg.sender);
+        emit RepositoryCreated(tokenId, name, msg.sender, description);
 
         return tokenId;
     }
