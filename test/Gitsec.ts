@@ -180,6 +180,154 @@ describe("Gitsec unit tests", function () {
         });
     });
 
+    describe("Fork repository", function () {
+        it("Should mint token to caller", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description";
+            const url = "//";
+
+            await gitsec.connect(address1).forkRepository(repoName, repoDescription, url);
+
+            expect(await gitsec.ownerOf(1)).to.equal(address1.address);
+        });
+
+        it("Should change callers balance", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description";
+            const url = "//";
+
+            await gitsec.connect(address1).forkRepository(repoName, repoDescription, url);
+
+            expect(await gitsec.balanceOf(address1.address)).to.equal(1);
+        });
+
+        it("Should increase total supply", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description";
+            const url = "//";
+
+            await gitsec.connect(address1).forkRepository(repoName, repoDescription, url);
+
+            expect(await gitsec.totalSupply()).to.equal(1);
+        });
+
+        it("Should add repository to repositories mapping", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description";
+            const url = "//";
+
+            await gitsec.connect(address1).forkRepository(repoName, repoDescription, url);
+
+            const repo = await gitsec.getRepository(1);
+
+            expect(repo.id).to.equal(1);
+            expect(repo.name).to.equal(repoName);
+            expect(repo.owner).to.equal(address1.address);
+            expect(repo.description).to.equal(repoDescription);
+            expect(repo.forkedFrom).to.equal(url);
+        });
+
+        it("Should add repository id to user repositories mapping", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description";
+            const url = "//";
+
+            await gitsec.connect(address1).forkRepository(repoName, repoDescription, url);
+
+            const repos = await gitsec.getUserRepositories(address1.address);
+
+            expect(repos[0].id).to.equal(1);
+            expect(repos[0].name).to.equal(repoName);
+            expect(repos[0].owner).to.equal(address1.address);
+            expect(repos[0].description).to.equal(repoDescription);
+            expect(repos[0].forkedFrom).to.equal(url);
+        });
+
+        it("Should return all created repositories", async function () {
+            const {gitsec, address1, address2} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description";
+            const url = "//";
+
+            await gitsec.connect(address1).forkRepository(repoName, repoDescription, url);
+            await gitsec.connect(address2).forkRepository(repoName, repoDescription, url);
+
+            const repos = await gitsec.getAllRepositories();
+
+            expect(repos[0].id).to.equal(1);
+            expect(repos[0].name).to.equal(repoName);
+            expect(repos[0].owner).to.equal(address1.address);
+            expect(repos[0].description).to.equal(repoDescription);
+            expect(repos[0].forkedFrom).to.equal(url);
+
+            expect(repos[1].id).to.equal(2);
+            expect(repos[1].name).to.equal(repoName);
+            expect(repos[1].owner).to.equal(address2.address);
+            expect(repos[1].description).to.equal(repoDescription);
+            expect(repos[1].forkedFrom).to.equal(url);
+        });
+
+        it("Should emit transfer event", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description";
+            const url = "//";
+
+            const tx = gitsec.connect(address1).forkRepository(repoName, repoDescription, url);
+
+            await expect(tx).to.emit(gitsec, "Transfer").withArgs(zeroAddress, address1.address, 1);
+        });
+
+        it("Should emit repository forked event", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description"
+            const url = "//";
+
+            const tx = gitsec.connect(address1).forkRepository(repoName, repoDescription, url);
+
+            await expect(tx).to.emit(gitsec, "RepositoryForked").withArgs(1, repoName, address1.address, repoDescription, url);
+        });
+
+        it.skip("Should not create repository if name is null", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "";
+            const repoDescription = "Test repo description";
+            const url = "//";
+
+            const tx = gitsec.connect(address1).forkRepository(repoName, repoDescription, url);
+
+            await expect(tx).to.be.revertedWith("Gitsec: name is null");
+        });
+
+        it.skip("Should not create repository if name is spaces only", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "   ";
+            const repoDescription = "Test repo description";
+            const url = "//";
+
+            const tx = gitsec.connect(address1).forkRepository(repoName, repoDescription, url);
+
+            await expect(tx).to.be.revertedWith("Gitsec: name is null");
+        });
+
+        it.skip("Should not create repository if url is invalid", async function () {
+            const {gitsec, address1} = await loadFixture(deployGitsecFixture);
+            const repoName = "Test repo";
+            const repoDescription = "Test repo description";
+            const url = "...";
+
+            const tx = gitsec.connect(address1).forkRepository(repoName, repoDescription, url);
+
+            await expect(tx).to.be.revertedWith("Gitsec: url is invalid");
+        });
+    });
+
     describe("Set admin", function () {
         it("Should set admin", async function () {
             const {gitsec, address2} = await loadFixture(deployGitsecFixture);

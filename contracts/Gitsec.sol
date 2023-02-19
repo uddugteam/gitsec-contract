@@ -14,6 +14,7 @@ contract Gitsec is ERC721A, Ownable {
      * - `owner`        repo and NFT owner
      * - `IPFS`         repo IPFS hash
      * - `lastUpdate`   repo last IPFS hash update
+     * - `forkedFrom`   url from where repo was forked. If created using `createRepository` - always null
      */
     struct Repository {
         uint256 id;
@@ -22,6 +23,7 @@ contract Gitsec is ERC721A, Ownable {
         address owner;
         string IPFS;
         uint256 lastUpdate;
+        string forkedFrom;
     }
 
     // Mapping token and repo ID to repository data struct
@@ -35,6 +37,9 @@ contract Gitsec is ERC721A, Ownable {
 
     // Triggered when repository created
     event RepositoryCreated(uint256 repId, string repName, address owner, string description);
+
+    // Triggered when repository created by forking an existing one
+    event RepositoryForked(uint256 repId, string repName, address owner, string description, string url);
 
     // Triggered when IPFS hash is updated
     event IPFSHashUpdated(uint256 indexed repId, address indexed owner, string IPFS);
@@ -57,10 +62,34 @@ contract Gitsec is ERC721A, Ownable {
         uint256 tokenId = _nextTokenId();
 
         _safeMint(msg.sender, 1);
-        _repositories[tokenId] = Repository(tokenId, name, description, msg.sender, "", 0);
+        _repositories[tokenId] = Repository(tokenId, name, description, msg.sender, "", 0, "");
         _userRepositories[msg.sender].push(tokenId);
 
         emit RepositoryCreated(tokenId, name, msg.sender, description);
+
+        return tokenId;
+    }
+
+    /*
+     * Allows to create repository by forking an existiong repository.
+     * Mints NFT to caller and adds Repository data struct to `_repositories` mapping with url as `forkedFrom` field
+     *
+     * @param name - repository name
+     * @param description - repository description
+     * @param url - forked from URL
+     * @return repository ID
+     *
+     * emits `RepositoryForked` event
+     * emits `Transfer` event {See IERC721A}
+     */
+    function forkRepository(string memory name, string memory description, string memory url) external returns(uint256) {
+        uint256 tokenId = _nextTokenId();
+
+        _safeMint(msg.sender, 1);
+        _repositories[tokenId] = Repository(tokenId, name, description, msg.sender, "", 0, url);
+        _userRepositories[msg.sender].push(tokenId);
+
+        emit RepositoryForked(tokenId, name, msg.sender, description, url);
 
         return tokenId;
     }
