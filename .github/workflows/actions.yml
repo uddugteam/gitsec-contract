@@ -1,7 +1,8 @@
 name: "Check Code And Make Release"
 
 env:
-  PROVIDER_URL: ${{ secrets.PROVIDER_URL }}
+  CHIADO_PROVIDER_URL: ${{ secrets.CHIADO_PROVIDER_URL }}
+  GNOSIS_PROVIDER_URL: ${{ secrets.GNOSIS_PROVIDER_URL }}
   PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
 
 on:
