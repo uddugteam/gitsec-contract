@@ -1,0 +1,70 @@
+name: "Check Code And Make Release"
+
+env:
+  PROVIDER_URL: ${{ secrets.PROVIDER_URL }}
+  PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+
+on:
+  pull_request:
+    branches:
+      - "main"
+  push:
+    branches:
+      - "main"
+
+jobs:
+  checking:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Check out the repo"
+        uses: "actions/checkout@v3"
+
+      - name: "Install Node.js"
+        uses: "actions/setup-node@v3"
+        with:
+          cache: "yarn"
+          node-version: "16"
+
+      - name: "Install the dependencies"
+        run: "yarn install --immutable"
+
+      - name: "Lint the code"
+        run: "yarn lint"
+
+      - name: "Add lint summary"
+        run: |
+          echo "## Lint results" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Passed" >> $GITHUB_STEP_SUMMARY
+
+      - name: "Compile the contracts and generate the TypeChain bindings"
+        run: "yarn typechain"
+
+      - name: "Test the contracts and generate the coverage report"
+        run: "yarn coverage"
+
+      - name: "Add test summary"
+        run: |
+          echo "## Test results" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Passed" >> $GITHUB_STEP_SUMMARY
+
+  release:
+    name: Make Release
+    needs:
+      - checking
+    runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.tag_version.outputs.new_tag }}
+    steps:
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          github_token: ${{ secrets.RELEASES_ACTION_GITHUB_TOKEN }}
+
+      - name: Create a GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+          token: ${{ secrets.RELEASES_ACTION_GITHUB_TOKEN }}

@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
-import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "erc721a/contracts/ERC721A.sol";
 
 contract Gitsec is ERC721A, Ownable {
-
     /*
      * Repository data struct
      * - `id`           repo and NFT ID
@@ -44,9 +43,7 @@ contract Gitsec is ERC721A, Ownable {
     // Triggered when IPFS hash is updated
     event IPFSHashUpdated(uint256 indexed repId, address indexed owner, string IPFS);
 
-    constructor(string memory name, string memory symbol)
-    ERC721A(name, symbol)
-    {}
+    constructor(string memory name, string memory symbol) ERC721A(name, symbol) {}
 
     /*
      * Allows to create repository. Mints NFT to caller and adds Repository data struct to `_repositories` mapping
@@ -58,7 +55,7 @@ contract Gitsec is ERC721A, Ownable {
      * emits `RepositoryCreated` event
      * emits `Transfer` event {See IERC721A}
      */
-    function createRepository(string memory name, string memory description) external returns(uint256) {
+    function createRepository(string memory name, string memory description) external returns (uint256) {
         uint256 tokenId = _nextTokenId();
 
         _safeMint(msg.sender, 1);
@@ -82,7 +79,11 @@ contract Gitsec is ERC721A, Ownable {
      * emits `RepositoryForked` event
      * emits `Transfer` event {See IERC721A}
      */
-    function forkRepository(string memory name, string memory description, string memory url) external returns(uint256) {
+    function forkRepository(
+        string memory name,
+        string memory description,
+        string memory url
+    ) external returns (uint256) {
         uint256 tokenId = _nextTokenId();
 
         _safeMint(msg.sender, 1);
@@ -95,17 +96,17 @@ contract Gitsec is ERC721A, Ownable {
     }
 
     // Returns Repository data struct for given repo ID
-    function getRepository(uint256 id) external view returns(Repository memory) {
+    function getRepository(uint256 id) external view returns (Repository memory) {
         return _repositories[id];
     }
 
     // Returns user repositories array
-    function getUserRepositories(address user) external view returns(Repository[] memory) {
+    function getUserRepositories(address user) external view returns (Repository[] memory) {
         Repository[] memory userRepositories = new Repository[](_userRepositories[user].length);
 
         uint256 index = 0;
 
-        for(uint256 i = 0; i < _nextTokenId(); i++) {
+        for (uint256 i = 0; i < _nextTokenId(); i++) {
             if (_repositories[i].owner == user) {
                 userRepositories[index] = _repositories[i];
                 index++;
@@ -116,12 +117,12 @@ contract Gitsec is ERC721A, Ownable {
     }
 
     // Returns all repositories array
-    function getAllRepositories() external view returns(Repository[] memory) {
+    function getAllRepositories() external view returns (Repository[] memory) {
         Repository[] memory userRepositories = new Repository[](totalSupply());
 
         uint256 index = 0;
 
-        for(uint256 i = 0; i < _nextTokenId(); i++) {
+        for (uint256 i = 0; i < _nextTokenId(); i++) {
             if (_repositories[i].owner != address(0)) {
                 userRepositories[index] = _repositories[i];
                 index++;
@@ -144,7 +145,7 @@ contract Gitsec is ERC721A, Ownable {
     }
 
     // Returns current contract admin address
-    function admin() external view returns(address) {
+    function admin() external view returns (address) {
         return _admin;
     }
 
@@ -207,14 +208,16 @@ contract Gitsec is ERC721A, Ownable {
 
         for (uint256 i = 0; i < _userRepositories[msg.sender].length; i++) {
             if (_userRepositories[msg.sender][i] == id) {
-                _userRepositories[msg.sender][i] = _userRepositories[msg.sender][_userRepositories[msg.sender].length -1];
+                _userRepositories[msg.sender][i] = _userRepositories[msg.sender][
+                    _userRepositories[msg.sender].length - 1
+                ];
                 _userRepositories[msg.sender].pop();
                 break;
             }
         }
     }
 
-    function _isOwnerOrAdmin(uint256 id, address user) internal view returns(bool) {
+    function _isOwnerOrAdmin(uint256 id, address user) internal view returns (bool) {
         return _repositories[id].owner == user || _admin == user;
     }
 
@@ -224,5 +227,4 @@ contract Gitsec is ERC721A, Ownable {
     function _startTokenId() internal view override returns (uint256) {
         return 1;
     }
-
 }
