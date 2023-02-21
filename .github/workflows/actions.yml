@@ -51,6 +51,7 @@ jobs:
     name: Make Release
     needs:
       - checking
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     outputs:
       release_tag: ${{ steps.tag_version.outputs.new_tag }}
