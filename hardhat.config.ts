@@ -1,6 +1,6 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
-require('hardhat-deploy');
+require("hardhat-deploy");
 
 const config: HardhatUserConfig = {
   solidity: "0.8.17",
@@ -13,8 +13,8 @@ const config: HardhatUserConfig = {
     chiado: {
       url: process.env.CHIADO_PROVIDER_URL,
       gasPrice: 1000000000,
-      accounts: [process.env.PRIVATE_KEY as string]
-    }
+      accounts: [process.env.PRIVATE_KEY as string],
+    },
   },
 };
 
