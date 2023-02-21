@@ -15,12 +15,12 @@
 
 ## Introduction
 
-GitSec is a smart contract that enables secure and decentralized storage of Git repository 
-commit hashes on the Gnosis blockchain. By leveraging the security and immutability of the 
-Gnosis blockchain, GitSec ensures that the recorded hashes are tamper-proof and verifiable by 
-anyone. This provides a robust solution for ensuring the integrity and authenticity of Git 
-repository history, which is critical for applications that require secure version control. 
-With GitSec, users can trust that their Git repository history has not been altered or manipulated, 
+GitSec is a smart contract that enables secure and decentralized storage of Git repository
+commit hashes on the Gnosis blockchain. By leveraging the security and immutability of the
+Gnosis blockchain, GitSec ensures that the recorded hashes are tamper-proof and verifiable by
+anyone. This provides a robust solution for ensuring the integrity and authenticity of Git
+repository history, which is critical for applications that require secure version control.
+With GitSec, users can trust that their Git repository history has not been altered or manipulated,
 providing greater confidence and reliability for their software development projects.
 
 ## Getting Started
@@ -59,62 +59,74 @@ add the following environment variables to the .env file:
 ## Usage
 
 ### Creating a Repository
-To create a repository, call the `createRepository` function of the deployed smart contract 
+
+To create a repository, call the `createRepository` function of the deployed smart contract
 with the repository name and description as arguments:
 
 ```solidity
 function createRepository(string memory name, string memory description) external returns (uint256)
 ```
+
 This function will mint an NFT to the caller and add a new `Repository` struct to the `_repositories`
 mapping. The ID of the new repository will be returned as the function output.
 
 ### Forking a Repository
-To fork an existing repository, call the `forkRepository` function of the deployed smart contract with the repository 
+
+To fork an existing repository, call the `forkRepository` function of the deployed smart contract with the repository
 name, description, and the URL of the repository you want to fork as arguments:
 
 ```solidity
 function forkRepository(string memory name, string memory description, string memory url) external returns (uint256)
 ```
-This function will mint an NFT to the caller and add a new `Repository` struct to the `_repositories` 
-mapping. The `forkedFrom` field of the new repository struct will be set to the URL of the repository 
+
+This function will mint an NFT to the caller and add a new `Repository` struct to the `_repositories`
+mapping. The `forkedFrom` field of the new repository struct will be set to the URL of the repository
 you want to fork. The ID of the new repository will be returned as the function output.
 
 ### Setting/Updating IPFS Hash
-To set or update the IPFS hash for a repository, call the `setIPFS` function of the deployed smart 
+
+To set or update the IPFS hash for a repository, call the `setIPFS` function of the deployed smart
 contract with the repository ID and the new IPFS hash as arguments:
 
 ```solidity
 function setIPFS(uint256 id, string memory newIPFS) external
 ```
+
 This function will update the IPFS field of the corresponding `Repository` struct in the
-`_repositories` mapping with the new IPFS hash. The `lastUpdate` field of the `Repository` struct will 
+`_repositories` mapping with the new IPFS hash. The `lastUpdate` field of the `Repository` struct will
 also be updated to reflect the time of the update.
 
 ### Getting Repository Data
+
 To get the data for a specific repository, call the `getRepository` function of the deployed smart contract
 with the repository ID as an argument:
 
 ```solidity
 function getRepository(uint256 id) external view returns (Repository memory)
 ```
+
 This function will return a `Repository` struct with the data for the specified repository.
 
 ### Getting User Repositories
-To get the list of repositories owned by a user, call the `getUserRepositories` function of the deployed 
+
+To get the list of repositories owned by a user, call the `getUserRepositories` function of the deployed
 smart contract with the user's address as an argument:
 
 ```solidity
 function getUserRepositories(address user) external view returns (Repository[] memory)
 ```
-This function will return an array of `Repository` structs with the data for all repositories owned 
+
+This function will return an array of `Repository` structs with the data for all repositories owned
 by the specified user.
 
 ### Getting All Repositories
+
 To get the list of all repositories, call the `getAllRepositories` function of the deployed smart contract:
 
 ```solidity
 function getAllRepositories() external view returns (Repository[] memory)
 ```
+
 This function will return an array of `Repository` structs with the data for all repositories.
 
 ## Testing
@@ -142,7 +154,6 @@ This project makes use of the following external resources:
 - The [hardhat](https://hardhat.org/) development environment for testing and deployment.
 - The [ethers.js](https://docs.ethers.io/ethers.js/html/) library for interacting with the Ethereum network.
 - The [ERC721A](https://www.erc721a.org) implementation of ERC721A standard for non-fungible tokens (NFTs).
-
 
 ## License
 
